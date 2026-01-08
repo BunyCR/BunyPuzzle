@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>Buny Puzzle</title>
+  <meta name="description" content="Seviyeli ve eğlenceli bulmaca oyunları">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#111111">
+
+  <!-- GOOGLE ADSENSE (BURAYA YAYINCI KİMLİĞİNİ YAZ) -->
+  <script async
+    src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-340044567XXXXXXXX"
+    crossorigin="anonymous"></script>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: #fff;
+      text-align: center;
+    }
+    .box {
+      max-width: 600px;
+      margin: 40px auto;
+      padding: 20px;
+      background: #1c1c1c;
+      border-radius: 12px;
+    }
+    button {
+      padding: 10px 20px;
+      background: #4caf50;
+      border: none;
+      border-radius: 6px;
+      color: #fff;
+      font-size: 16px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="box">
+    <h1>Buny Puzzle</h1>
+    <p>Bulmacayı çöz ve seviyeyi tamamla</p>
+    <button onclick="finishGame()">Seviyeyi Bitir</button>
+  </div>
+
+  <!-- OYUN BİTİŞ / SKOR EKRANI -->
+  <div class="box" id="end" style="display:none">
+    <h2>Seviye Tamamlandı</h2>
+    <p>Tebrikler 🎉</p>
+
+    <!-- REKLAM BİRİMİ (8355849119) -->
+    <ins class="adsbygoogle"
+      style="display:block"
+      data-ad-client="ca-pub-3400445677558723"
+      data-ad-slot="9876543210"
+      data-ad-format="auto"
+      data-full-width-responsive="true"></ins>
+
+    <script>
+      (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
+  </div>
+
+  <script>
+    function finishGame() {
+      document.querySelector(".box").style.display = "none";
+      document.getElementById("end").style.display = "block";
+    }
+
+    // SERVICE WORKER
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("sw.js");
+    }
+  </script>
+
+</body>
+</html>

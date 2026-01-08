@@ -6,73 +6,88 @@
     <title>WordZen</title>
     <link rel="manifest" href="manifest.json">
     <style>
-        :root { --accent: #fa983a; --bg: #000; }
-        body { margin: 0; background: var(--bg); color: #fff; font-family: 'Segoe UI', sans-serif; overflow: hidden; touch-action: none; display: flex; flex-direction: column; align-items: center; height: 100vh; }
-        
+        :root { --accent: #fa983a; --blue: #2980b9; }
+        body { 
+            margin: 0; padding: 0; height: 100vh; overflow: hidden; touch-action: none;
+            font-family: 'Segoe UI', sans-serif;
+            background: url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=800&q=80') center/cover;
+            display: flex; flex-direction: column; align-items: center;
+        }
+
         /* Splash Screen */
         #splash { position: fixed; inset: 0; background: #000; z-index: 1000; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: 1s; }
-        .s-logo { font-size: 3.5rem; font-weight: bold; letter-spacing: 8px; text-shadow: 0 0 20px var(--accent); animation: pulse 2s infinite; }
-        
-        /* UI */
-        #top-bar { width: 100%; display: flex; justify-content: space-between; padding: 15px 25px; box-sizing: border-box; font-size: 1.2rem; font-weight: bold; }
-        #bonus-ui { position: fixed; top: 70px; left: 20px; background: rgba(250, 152, 58, 0.2); padding: 8px 15px; border-radius: 20px; border: 1px solid var(--accent); font-size: 0.9rem; }
+        .s-logo { font-size: 3.5rem; font-weight: bold; color: #fff; letter-spacing: 8px; text-shadow: 0 0 20px var(--accent); }
 
-        /* Kelime Tablosu */
-        #grid { flex: 1; display: grid; grid-template-columns: repeat(6, 45px); gap: 8px; justify-content: center; align-content: center; }
-        .tile { width: 45px; height: 45px; background: rgba(255,255,255,0.05); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 22px; color: transparent; transition: 0.4s; border: 1px solid rgba(255,255,255,0.1); }
-        .tile.active { background: #fff; color: #000; transform: scale(1.1); box-shadow: 0 0 15px #fff; border: none; }
+        /* Üst Panel */
+        #ui-top { width: 100%; display: flex; justify-content: space-between; padding: 20px; box-sizing: border-box; color: #fff; font-weight: bold; text-shadow: 1px 1px 5px #000; }
+        #bonus-ui { position: fixed; top: 70px; left: 20px; background: rgba(255,255,255,0.2); padding: 5px 15px; border-radius: 20px; backdrop-filter: blur(5px); border: 1px solid #fff; font-size: 14px; }
 
-        /* Önizleme */
-        #preview { height: 45px; background: var(--accent); padding: 5px 30px; border-radius: 25px; font-weight: bold; font-size: 24px; margin-bottom: 20px; display: none; box-shadow: 0 0 20px var(--accent); }
+        /* Bulmaca Alanı */
+        #puzzle-area { position: relative; flex: 1; width: 100%; margin-top: 20px; }
+        .tile { 
+            position: absolute; width: 42px; height: 42px; background: rgba(255,255,255,0.9); 
+            border-radius: 5px; display: flex; align-items: center; justify-content: center; 
+            font-weight: bold; font-size: 22px; color: transparent; box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .tile.found { color: #2c3e50; background: #fff; transform: scale(1.1); box-shadow: 0 0 15px var(--accent); }
+
+        /* Seçim Önizleme */
+        #preview { background: var(--blue); color: #fff; padding: 8px 30px; border-radius: 25px; font-weight: bold; font-size: 22px; margin-bottom: 15px; display: none; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
 
         /* Tekerlek */
-        .wheel-box { position: relative; width: 280px; height: 280px; margin-bottom: 50px; }
+        .wheel-container { position: relative; width: 260px; height: 260px; background: rgba(255,255,255,0.25); backdrop-filter: blur(8px); border-radius: 50%; border: 2px solid rgba(255,255,255,0.4); margin-bottom: 40px; }
         #line-svg { position: absolute; inset: 0; pointer-events: none; z-index: 5; }
-        .node { position: absolute; width: 60px; height: 60px; background: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 26px; font-weight: bold; color: #000; z-index: 10; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
-        .node.selected { background: var(--accent); color: #fff; transform: scale(1.2); }
-        #shuffle { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(255,255,255,0.1); border: 2px solid #fff; color: #fff; border-radius: 50%; width: 50px; height: 50px; font-size: 20px; cursor: pointer; z-index: 15; }
+        .node { position: absolute; width: 55px; height: 55px; background: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 26px; font-weight: bold; color: #2c3e50; z-index: 10; box-shadow: 0 4px 10px rgba(0,0,0,0.2); transition: 0.2s; }
+        .node.selected { background: var(--blue); color: #fff; transform: scale(1.2); }
+        #shuffle { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: none; border: none; font-size: 24px; cursor: pointer; z-index: 15; opacity: 0.7; }
     </style>
 </head>
 <body>
 
 <div id="splash">
     <div class="s-logo">WORDZEN</div>
-    <div style="color: var(--accent); letter-spacing: 4px;">STUDIOS</div>
+    <div style="color: var(--accent); letter-spacing: 5px;">STUDIOS</div>
 </div>
 
-<div id="top-bar">
-    <div id="lvl-txt">Seviye: 1</div>
+<div id="ui-top">
+    <div id="lvl-txt">BÖLÜM 1</div>
     <div id="coin-txt">🪙 0</div>
 </div>
 
 <div id="bonus-ui">🎁 Bonus: <span id="b-count">0</span>/10</div>
 
-<div id="grid"></div>
+<div id="puzzle-area"></div>
 <div id="preview"></div>
 
-<div class="wheel-box">
+<div class="wheel-container">
     <svg id="line-svg"></svg>
-    <button id="shuffle" onclick="shuffle()">🔄</button>
+    <button id="shuffle" onclick="shuffleNodes()">🔄</button>
     <div id="wheel"></div>
 </div>
 
 <script>
-// --- 100 SEVİYE ŞABLONU ---
-// Burayı 100'e kadar doldurabilirsin.
+// --- 100 SEVİYE VERİSİ ---
 const allLevels = [
-    { letters: "AKLNZ", words: ["KAZAN", "KAZ", "NAL"] },
-    { letters: "ETKİL", words: ["TEKİL", "ETİK", "KİTLE"] },
-    { letters: "ASLAN", words: ["ASLAN", "ASAL", "SALA", "NAL"] },
-    // Örnek: { letters: "ABCDE", words: ["..."] },
+    { letters: "AKLNZ", words: [{t:"KAZAN",x:3,y:1,d:"v"},{t:"KANAL",x:1,y:1,d:"h"}] },
+    { letters: "UZAKİ", words: [{t:"UZAK",x:2,y:3,d:"h"},{t:"AKİL",x:4,y:1,d:"v"}] },
+    { letters: "EDNİZ", words: [{t:"DENİZ",x:2,y:0,d:"v"},{t:"DİZ",x:2,y:0,d:"h"}] }
+    // Diğer seviyeler buraya eklenecek...
 ];
+
+// 100'e tamamlayan otomatik döngü (Test için benzer yapılar kurar)
+for(let i=3; i<100; i++) {
+    allLevels.push({ letters: "KALEM", words: [{t:"KALEM",x:1,y:2,d:"h"},{t:"EMEL",x:3,y:1,d:"v"}] });
+}
 
 let curLvl = parseInt(localStorage.getItem('wz_lvl')) || 0;
 let coins = parseInt(localStorage.getItem('wz_coins')) || 0;
-let bonusList = [];
-let selectedNodes = [];
-let found = [];
-let drawing = false;
+let bonusCount = 0;
+let selected = [];
+let foundWords = [];
+let isDrawing = false;
 
+// TDK API Kontrolü
 async function checkTDK(word) {
     try {
         const r = await fetch(`https://sozluk.gov.tr/gts?ara=${word.toLowerCase('tr')}`);
@@ -81,113 +96,127 @@ async function checkTDK(word) {
     } catch { return false; }
 }
 
-function initGame() {
-    if(curLvl >= 100 || curLvl >= allLevels.length) {
-        document.body.innerHTML = "<h1 style='margin-top:100px; text-align:center'>YENİ SEVİYELER YAKINDA!</h1>";
-        return;
+function init() {
+    if(curLvl >= 100) {
+        showEnd(); return;
     }
     const data = allLevels[curLvl];
-    found = [];
-    document.getElementById('lvl-txt').innerText = `Seviye: ${curLvl + 1}`;
+    foundWords = [];
+    document.getElementById('lvl-txt').innerText = `BÖLÜM ${curLvl + 1}`;
     document.getElementById('coin-txt').innerText = `🪙 ${coins}`;
     
-    const g = document.getElementById('grid'); g.innerHTML = "";
-    data.words.forEach(w => {
-        w.split('').forEach(c => {
-            const t = document.createElement('div');
-            t.className = `tile t-${w}`; t.innerText = c;
-            g.appendChild(t);
+    // Bulmaca Gridini Kur
+    const area = document.getElementById('puzzle-area');
+    area.innerHTML = "";
+    data.words.forEach(wObj => {
+        wObj.t.split('').forEach((char, i) => {
+            const px = wObj.d === 'h' ? (wObj.x + i) : wObj.x;
+            const py = wObj.d === 'v' ? (wObj.y + i) : wObj.y;
+            if(!document.getElementById(`t-${px}-${py}`)) {
+                const t = document.createElement('div');
+                t.id = `t-${px}-${py}`;
+                t.className = `tile word-${wObj.t}`;
+                t.style.left = `calc(50% + ${(px - 3) * 46}px)`;
+                t.style.top = `${py * 46}px`;
+                t.innerText = char;
+                area.appendChild(t);
+            }
         });
     });
 
-    const w = document.getElementById('wheel'); w.innerHTML = "";
+    // Tekerleği Kur
+    const wheel = document.getElementById('wheel');
+    wheel.innerHTML = "";
     data.letters.split('').forEach((c, i) => {
-        const a = (i / data.letters.length) * (Math.PI*2) - (Math.PI/2);
-        const x = 140 + 100 * Math.cos(a) - 30;
-        const y = 140 + 100 * Math.sin(a) - 30;
+        const angle = (i / data.letters.length) * (Math.PI*2) - (Math.PI/2);
+        const x = 130 + 95 * Math.cos(angle) - 27;
+        const y = 130 + 95 * Math.sin(angle) - 27;
         const n = document.createElement('div');
         n.className = 'node'; n.style.left = x+'px'; n.style.top = y+'px'; n.innerText = c;
-        n.addEventListener('mousedown', (e) => start(e, n));
-        n.addEventListener('touchstart', (e) => start(e, n));
-        n.addEventListener('mouseenter', () => over(n));
-        w.appendChild(n);
+        n.addEventListener('mousedown', e => startDraw(e, n));
+        n.addEventListener('touchstart', e => startDraw(e, n));
+        n.addEventListener('mouseenter', () => overNode(n));
+        wheel.appendChild(n);
     });
 }
 
-function start(e, n) { drawing = true; select(n); document.getElementById('preview').style.display="block"; }
-function over(n) { if(drawing && !selectedNodes.includes(n)) select(n); }
+function startDraw(e, n) { isDrawing = true; addNode(n); document.getElementById('preview').style.display="block"; }
+function overNode(n) { if(isDrawing && !selected.includes(n)) addNode(n); }
 window.addEventListener('touchmove', e => {
-    if(!drawing) return;
+    if(!isDrawing) return;
     const t = e.touches[0];
     const el = document.elementFromPoint(t.clientX, t.clientY);
-    if(el && el.classList.contains('node')) over(el);
+    if(el && el.classList.contains('node')) overNode(el);
 });
 
-function select(n) {
-    selectedNodes.push(n); n.classList.add('selected');
-    document.getElementById('preview').innerText = selectedNodes.map(x=>x.innerText).join('');
-    renderLines();
+function addNode(n) {
+    selected.push(n); n.classList.add('selected');
+    document.getElementById('preview').innerText = selected.map(x=>x.innerText).join('');
+    drawLines();
 }
 
-function renderLines() {
-    const s = document.getElementById('line-svg'); s.innerHTML = "";
-    if(selectedNodes.length < 2) return;
-    let path = `M ${parseInt(selectedNodes[0].style.left)+30} ${parseInt(selectedNodes[0].style.top)+30}`;
-    for(let i=1; i<selectedNodes.length; i++) {
-        path += ` L ${parseInt(selectedNodes[i].style.left)+30} ${parseInt(selectedNodes[i].style.top)+30}`;
-    }
-    const l = document.createElementNS("http://www.w3.org/2000/svg", "path");
-    l.setAttribute("d", path); l.setAttribute("stroke", "var(--accent)"); l.setAttribute("stroke-width", "10"); l.setAttribute("fill", "none"); l.setAttribute("stroke-linecap", "round");
-    s.appendChild(l);
+function drawLines() {
+    const svg = document.getElementById('line-svg'); svg.innerHTML = "";
+    if(selected.length < 2) return;
+    let d = `M ${parseInt(selected[0].style.left)+27} ${parseInt(selected[0].style.top)+27}`;
+    for(let i=1; i<selected.length; i++) d += ` L ${parseInt(selected[i].style.left)+27} ${parseInt(selected[i].style.top)+27}`;
+    const p = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    p.setAttribute("d", d); p.setAttribute("stroke", "var(--blue)"); p.setAttribute("stroke-width", "12"); p.setAttribute("fill", "none"); p.setAttribute("stroke-linecap", "round");
+    svg.appendChild(p);
 }
 
-async function end() {
-    if(!drawing) return;
-    const word = selectedNodes.map(x=>x.innerText).join('');
+async function endDraw() {
+    if(!isDrawing) return;
+    const word = selected.map(x=>x.innerText).join('');
     const data = allLevels[curLvl];
 
-    if(data.words.includes(word) && !found.includes(word)) {
-        found.push(word);
-        document.querySelectorAll(`.t-${word}`).forEach(t => t.classList.add('active'));
-        if(found.length === data.words.length) {
-            setTimeout(() => { curLvl++; localStorage.setItem('wz_lvl', curLvl); initGame(); }, 1000);
-        }
+    if(data.words.some(w => w.t === word) && !foundWords.includes(word)) {
+        foundWords.push(word);
+        document.querySelectorAll(`.word-${word}`).forEach(t => t.classList.add('found'));
+        if(foundWords.length === data.words.length) setTimeout(nextLvl, 1000);
     } else {
-        const ok = await checkTDK(word);
-        if(ok && !bonusList.includes(word) && !data.words.includes(word)) {
-            bonusList.push(word);
-            document.getElementById('b-count').innerText = bonusList.length;
-            if(bonusList.length >= 10) {
-                coins += 25; bonusList = [];
+        const valid = await checkTDK(word);
+        if(valid && !data.words.some(w => w.t === word)) {
+            bonusCount++;
+            document.getElementById('b-count').innerText = bonusCount;
+            if(bonusCount >= 10) {
+                coins += 25; bonusCount = 0;
                 localStorage.setItem('wz_coins', coins);
                 document.getElementById('coin-txt').innerText = `🪙 ${coins}`;
                 document.getElementById('b-count').innerText = "0";
-                alert("WORDZEN BONUS: +25 Jeton!");
+                alert("BONUS: +25 Jeton! 🪙");
             }
         }
     }
-    drawing = false; selectedNodes.forEach(n => n.classList.remove('selected'));
-    selectedNodes = []; document.getElementById('line-svg').innerHTML = "";
+    isDrawing = false; selected.forEach(n => n.classList.remove('selected'));
+    selected = []; document.getElementById('line-svg').innerHTML = "";
     document.getElementById('preview').style.display = "none";
 }
 
-window.addEventListener('mouseup', end); window.addEventListener('touchend', end);
+function nextLvl() {
+    curLvl++; localStorage.setItem('wz_lvl', curLvl);
+    init();
+}
 
-function shuffle() {
-    const ns = Array.from(document.querySelectorAll('.node'));
-    const cs = ns.map(n => n.innerText).sort(() => Math.random() - 0.5);
-    ns.forEach((n, i) => n.innerText = cs[i]);
+function showEnd() {
+    document.body.innerHTML = `<div style="height:100vh; display:flex; flex-direction:column; justify-content:center; align-items:center; background:#000; color:#fa983a; text-align:center;">
+        <h1 style="font-size:3rem">TEBRİKLER!</h1>
+        <p style="color:#fff">Tüm bölümleri tamamladın.</p>
+        <div style="margin-top:30px; padding:15px 30px; border:2px solid #fa983a; border-radius:50px;">YENİ BÖLÜMLER YAKINDA!</div>
+    </div>`;
+}
+
+window.addEventListener('mouseup', endDraw); window.addEventListener('touchend', endDraw);
+function shuffleNodes() {
+    const nodes = Array.from(document.querySelectorAll('.node'));
+    const chars = nodes.map(n => n.innerText).sort(() => Math.random() - 0.5);
+    nodes.forEach((n, i) => n.innerText = chars[i]);
 }
 
 window.onload = () => {
-    setTimeout(() => {
-        document.getElementById('splash').style.opacity = "0";
-        setTimeout(() => document.getElementById('splash').style.display = "none", 1000);
-    }, 2500);
-    initGame();
+    setTimeout(() => { document.getElementById('splash').style.opacity = "0"; setTimeout(() => document.getElementById('splash').style.display = "none", 1000); }, 2500);
+    init();
 };
-
-if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js'); }
 </script>
 </body>
 </html>

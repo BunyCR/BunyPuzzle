@@ -1,20 +1,12 @@
 {
-  "name": "Buny Puzzle",
-  "short_name": "BunyPuzzle",
-  "start_url": "./",
+  "name": "WordZen",
+  "short_name": "WordZen",
+  "start_url": "index.html",
   "display": "standalone",
-  "background_color": "#111111",
-  "theme_color": "#111111",
+  "background_color": "#000000",
+  "theme_color": "#fa983a",
   "icons": [
-    {
-      "src": "icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png"
-    }
+    { "src": "192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "512.png", "sizes": "512x512", "type": "image/png" }
   ]
 }

@@ -2,103 +2,268 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<title>Buny Puzzle</title>
+<title>Buny Puzzle - Neon Saga</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Zor seviyeli kelime bulmaca oyunu">
-
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#111111">
-
-<script async
-src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-340044567XXXXXXXX"
-crossorigin="anonymous"></script>
-
 <style>
-body{margin:0;font-family:Arial;background:#111;color:#fff;text-align:center}
-.box{max-width:600px;margin:40px auto;padding:20px;background:#1c1c1c;border-radius:12px}
-.word{font-size:30px;letter-spacing:6px;margin:20px 0}
-input{padding:10px;font-size:18px;width:80%}
-button{margin-top:10px;padding:10px 20px;font-size:16px;border:none;border-radius:6px;background:#4caf50;color:#fff}
-.hidden{display:none}
-.level{opacity:.7}
+:root {
+  --neon-green: #39ff14;
+  --neon-blue: #00f3ff;
+  --neon-pink: #ff00ff;
+  --neon-red: #ff3131;
+  --bg-dark: #0a0a0a;
+}
+
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg-dark);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+/* Üst Gösterge Paneli */
+.header-ui {
+  position: fixed;
+  top: 20px;
+  width: 90%;
+  max-width: 500px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 10;
+}
+
+.coin-display {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 8px 15px;
+  border-radius: 20px;
+  border: 1px solid gold;
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+  font-weight: bold;
+  color: gold;
+}
+
+.hint-btn {
+  background: #111;
+  border: 2px solid var(--neon-green);
+  color: var(--neon-green);
+  border-radius: 50%;
+  width: 55px;
+  height: 55px;
+  cursor: pointer;
+  font-size: 24px;
+  box-shadow: 0 0 15px var(--neon-green);
+  transition: all 0.2s;
+}
+
+.hint-btn:active { transform: scale(0.9); }
+.hint-btn:disabled { opacity: 0.2; cursor: not-allowed; filter: grayscale(1); box-shadow: none; }
+
+/* Ana Oyun Kutusu */
+.game-container {
+  width: 90%;
+  max-width: 450px;
+  padding: 40px 20px;
+  background: #121212;
+  border-radius: 30px;
+  border: 1px solid rgba(255,255,255,0.1);
+  box-shadow: 0 0 40px rgba(0,0,0,1);
+  text-align: center;
+  position: relative;
+}
+
+h1 { color: var(--neon-blue); letter-spacing: 3px; text-shadow: 0 0 10px var(--neon-blue); margin: 0 0 10px 0; }
+
+.level-badge { font-size: 12px; text-transform: uppercase; color: var(--neon-pink); margin-bottom: 20px; display: block; }
+
+.word-box {
+  font-size: 36px;
+  font-weight: bold;
+  letter-spacing: 10px;
+  margin: 40px 0;
+  color: #fff;
+  text-shadow: 0 0 15px rgba(255,255,255,0.5);
+  min-height: 50px;
+}
+
+input {
+  background: #1a1a1a;
+  border: 2px solid #333;
+  border-radius: 15px;
+  padding: 15px;
+  color: #fff;
+  font-size: 20px;
+  width: 85%;
+  text-align: center;
+  outline: none;
+  transition: 0.3s;
+}
+
+input:focus { border-color: var(--neon-pink); box-shadow: 0 0 15px var(--neon-pink); }
+
+.submit-btn {
+  margin-top: 25px;
+  width: 90%;
+  padding: 15px;
+  border-radius: 15px;
+  border: none;
+  background: var(--neon-blue);
+  color: #000;
+  font-weight: bold;
+  font-size: 18px;
+  cursor: pointer;
+  box-shadow: 0 5px 15px rgba(0, 243, 255, 0.4);
+}
+
+/* Animasyonlar */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-10px); border-color: var(--neon-red); }
+  75% { transform: translateX(10px); border-color: var(--neon-red); }
+}
+
+.coin-fly {
+  position: fixed;
+  color: gold;
+  font-weight: bold;
+  font-size: 24px;
+  pointer-events: none;
+  animation: flyUp 1.2s ease-out forwards;
+  z-index: 100;
+}
+
+@keyframes flyUp {
+  0% { transform: translateY(0); opacity: 1; }
+  100% { transform: translateY(-300px); opacity: 0; }
+}
 </style>
 </head>
-
 <body>
 
-<div class="box" id="game">
-  <h1>Buny Puzzle</h1>
-  <div class="level" id="levelText"></div>
-  <p>Eksik harfleri tamamla</p>
-  <div class="word" id="puzzle"></div>
-  <input id="answer" placeholder="Kelimeyi yaz">
-  <br>
-  <button onclick="check()">Kontrol Et</button>
+<div class="header-ui">
+  <div class="coin-display">🪙 <span id="coinText">0</span></div>
+  <button class="hint-btn" id="hintBtn" onclick="useHint()">💡</button>
 </div>
 
-<div class="box hidden" id="end">
-  <h2>Doğru 🎉</h2>
-
-  <ins class="adsbygoogle"
-    style="display:block"
-    data-ad-client="ca-pub-3400445677558723"
-    data-ad-slot="8355849119"
-    data-ad-format="auto"
-    data-full-width-responsive="true"></ins>
-  <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-
-  <button onclick="next()">Devam</button>
+<div class="game-container" id="mainBox">
+  <span class="level-badge" id="levelInfo">Yükleniyor...</span>
+  <h1>BUNY PUZZLE</h1>
+  <div class="word-box" id="wordDisplay"></div>
+  <input type="text" id="userInput" placeholder="Tahminini yaz..." autocomplete="off">
+  <button class="submit-btn" onclick="check()">CEVAPLA</button>
 </div>
 
 <script>
-const puzzles = [
-"STRATEJİ","MUHAREBE","PARADOKS","SENTEZ","ANALİTİK","KRONOLOJİ","MANİPÜLASYON",
-"İLLÜZYON","PROVOKASYON","ENTROPİ","METAFOR","KONSPİRASYON","DİYALEKTİK",
-"ALGORİTMA","SİMÜLASYON","OPTİMİZASYON","REAKSİYON","KAVRAMSALLIK","VARSAYIM",
-"POSTÜLAT","EMPİRİK","TEZAHÜR","SPEKÜLASYON","MOTİVASYON","PARADİGMA",
-"ANOMALİ","KORELASYON","DETERMINİZM","NEDENSELLİK","OLASILIK","SENKRONİZASYON",
-"İNTERAKSİYON","KOMPLEKSİTE","KAOS","BİLİNÇALTI","FENOMEN","NORMATİF",
-"ONTOLOJİ","EPISTEMOLOJİ","RETORİK","SEMANTİK","PRAGMATİK","HEGEMONYA",
-"ALTERNATİF","TEZAT","SENTEZLEME","ÇÖZÜMLEME","KARMAŞIKLIK"
+const words = [
+    "STRATEJİ", "MUHAREBE", "PARADOKS", "SENTEZ", "ANALİTİK", "KRONOLOJİ", "MANİPÜLASYON",
+    "İLLÜZYON", "PROVOKASYON", "ENTROPİ", "METAFOR", "KONSPİRASYON", "DİYALEKTİK",
+    "ALGORİTMA", "SİMÜLASYON", "OPTİMİZASYON", "REAKSİYON", "KAVRAMSALLIK", "VARSAYIM",
+    "POSTÜLAT", "EMPİRİK", "TEZAHÜR", "SPEKÜLASYON", "MOTİVASYON", "PARADİGMA",
+    "ANOMALİ", "KORELASYON", "DETERMINİZM", "NEDENSELLİK", "OLASILIK", "SENKRONİZASYON",
+    "İNTERAKSİYON", "KOMPLEKSİTE", "KAOS", "BİLİNÇALTI", "FENOMEN", "NORMATİF",
+    "ONTOLOJİ", "EPISTEMOLOJİ", "RETORİK", "SEMANTİK", "PRAGMATİK", "HEGEMONYA",
+    "ALTERNATİF", "TEZAT", "SENTEZLEME", "ÇÖZÜMLEME", "KARMAŞIKLIK", "KOORDİNASYON"
 ];
 
-let level = 0;
+// Hafızadan verileri çek veya sıfırdan başla
+let currentLevel = parseInt(localStorage.getItem('bunyLevel')) || 0;
+let coins = parseInt(localStorage.getItem('bunyCoins')) || 0;
+let hintsUsed = []; // Mevcut kelime için kullanılan ipuçları
 
-function mask(word){
-  return word.split("").map((c,i)=> i%2===0 ? c : "_").join(" ");
+function saveGame() {
+    localStorage.setItem('bunyLevel', currentLevel);
+    localStorage.setItem('bunyCoins', coins);
 }
 
-function load(){
-  document.getElementById("levelText").innerText = "Seviye " + (level+1) + " / 50";
-  document.getElementById("puzzle").innerText = mask(puzzles[level]);
-  document.getElementById("answer").value = "";
-}
-load();
-
-function check(){
-  const ans = document.getElementById("answer").value.toUpperCase().trim();
-  if(ans === puzzles[level]){
-    document.getElementById("game").classList.add("hidden");
-    document.getElementById("end").classList.remove("hidden");
-  } else {
-    alert("Yanlış");
-  }
+function initGame() {
+    if (currentLevel >= words.length) {
+        alert("Oyun Bitti! Başa dönülüyor.");
+        currentLevel = 0;
+    }
+    hintsUsed = [];
+    renderLevel();
+    updateUI();
 }
 
-function next(){
-  document.getElementById("end").classList.add("hidden");
-  document.getElementById("game").classList.remove("hidden");
-  level++;
-  if(level >= puzzles.length){
-    alert("Tüm bulmacalar tamamlandı");
-    level = 0;
-  }
-  load();
+function renderLevel() {
+    const word = words[currentLevel];
+    let display = "";
+    for (let i = 0; i < word.length; i++) {
+        // Çift harfler açık, tekler kapalı (İpucu hariç)
+        if (i % 2 === 0 || hintsUsed.includes(i)) {
+            display += word[i];
+        } else {
+            display += "_";
+        }
+    }
+    document.getElementById("wordDisplay").innerText = display.split('').join(' ');
+    document.getElementById("levelInfo").innerText = `SEVİYE ${currentLevel + 1} / ${words.length}`;
+    document.getElementById("userInput").value = "";
 }
 
-if("serviceWorker" in navigator){
-  navigator.serviceWorker.register("sw.js");
+function check() {
+    const input = document.getElementById("userInput").value.toUpperCase().trim();
+    const correct = words[currentLevel];
+
+    if (input === correct) {
+        spawnCoinEffect();
+        coins += 5;
+        currentLevel++;
+        saveGame();
+        setTimeout(initGame, 600);
+    } else {
+        const box = document.getElementById("mainBox");
+        box.style.animation = "shake 0.4s ease";
+        setTimeout(() => box.style.animation = "", 400);
+    }
 }
+
+function useHint() {
+    if (coins >= 10) {
+        const word = words[currentLevel];
+        let hiddens = [];
+        for (let i = 0; i < word.length; i++) {
+            if (i % 2 !== 0 && !hintsUsed.includes(i)) hiddens.push(i);
+        }
+
+        if (hiddens.length > 0) {
+            const rand = hiddens[Math.floor(Math.random() * hiddens.length)];
+            hintsUsed.push(rand);
+            coins -= 10;
+            saveGame();
+            updateUI();
+            renderLevel();
+        }
+    }
+}
+
+function updateUI() {
+    document.getElementById("coinText").innerText = coins;
+    document.getElementById("hintBtn").disabled = coins < 10;
+}
+
+function spawnCoinEffect() {
+    const el = document.createElement("div");
+    el.className = "coin-fly";
+    el.innerText = "+5 🪙";
+    el.style.left = "50%";
+    el.style.top = "50%";
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 1200);
+}
+
+// Enter tuşu desteği
+document.getElementById("userInput").addEventListener("keyup", (e) => {
+    if (e.key === "Enter") check();
+});
+
+// Oyunu Başlat
+initGame();
 </script>
 
 </body>

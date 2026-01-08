@@ -1,84 +1,105 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <title>Buny Puzzle</title>
-  <meta name="description" content="Seviyeli ve eğlenceli bulmaca oyunları">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<title>Buny Puzzle</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Zor seviyeli kelime bulmaca oyunu">
 
-  <!-- PWA -->
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#111111">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#111111">
 
-  <!-- GOOGLE ADSENSE (BURAYA YAYINCI KİMLİĞİNİ YAZ) -->
-  <script async
-    src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-340044567XXXXXXXX"
-    crossorigin="anonymous"></script>
+<script async
+src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-340044567XXXXXXXX"
+crossorigin="anonymous"></script>
 
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #111;
-      color: #fff;
-      text-align: center;
-    }
-    .box {
-      max-width: 600px;
-      margin: 40px auto;
-      padding: 20px;
-      background: #1c1c1c;
-      border-radius: 12px;
-    }
-    button {
-      padding: 10px 20px;
-      background: #4caf50;
-      border: none;
-      border-radius: 6px;
-      color: #fff;
-      font-size: 16px;
-      cursor: pointer;
-    }
-  </style>
+<style>
+body{margin:0;font-family:Arial;background:#111;color:#fff;text-align:center}
+.box{max-width:600px;margin:40px auto;padding:20px;background:#1c1c1c;border-radius:12px}
+.word{font-size:30px;letter-spacing:6px;margin:20px 0}
+input{padding:10px;font-size:18px;width:80%}
+button{margin-top:10px;padding:10px 20px;font-size:16px;border:none;border-radius:6px;background:#4caf50;color:#fff}
+.hidden{display:none}
+.level{opacity:.7}
+</style>
 </head>
 
 <body>
 
-  <div class="box">
-    <h1>Buny Puzzle</h1>
-    <p>Bulmacayı çöz ve seviyeyi tamamla</p>
-    <button onclick="finishGame()">Seviyeyi Bitir</button>
-  </div>
+<div class="box" id="game">
+  <h1>Buny Puzzle</h1>
+  <div class="level" id="levelText"></div>
+  <p>Eksik harfleri tamamla</p>
+  <div class="word" id="puzzle"></div>
+  <input id="answer" placeholder="Kelimeyi yaz">
+  <br>
+  <button onclick="check()">Kontrol Et</button>
+</div>
 
-  <!-- OYUN BİTİŞ / SKOR EKRANI -->
-  <div class="box" id="end" style="display:none">
-    <h2>Seviye Tamamlandı</h2>
-    <p>Tebrikler 🎉</p>
+<div class="box hidden" id="end">
+  <h2>Doğru 🎉</h2>
 
-    <!-- REKLAM BİRİMİ (8355849119) -->
-    <ins class="adsbygoogle"
-      style="display:block"
-      data-ad-client="ca-pub-3400445677558723"
-      data-ad-slot="9876543210"
-      data-ad-format="auto"
-      data-full-width-responsive="true"></ins>
+  <ins class="adsbygoogle"
+    style="display:block"
+    data-ad-client="ca-pub-3400445677558723"
+    data-ad-slot="8355849119"
+    data-ad-format="auto"
+    data-full-width-responsive="true"></ins>
+  <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
 
-    <script>
-      (adsbygoogle = window.adsbygoogle || []).push({});
-    </script>
-  </div>
+  <button onclick="next()">Devam</button>
+</div>
 
-  <script>
-    function finishGame() {
-      document.querySelector(".box").style.display = "none";
-      document.getElementById("end").style.display = "block";
-    }
+<script>
+const puzzles = [
+"STRATEJİ","MUHAREBE","PARADOKS","SENTEZ","ANALİTİK","KRONOLOJİ","MANİPÜLASYON",
+"İLLÜZYON","PROVOKASYON","ENTROPİ","METAFOR","KONSPİRASYON","DİYALEKTİK",
+"ALGORİTMA","SİMÜLASYON","OPTİMİZASYON","REAKSİYON","KAVRAMSALLIK","VARSAYIM",
+"POSTÜLAT","EMPİRİK","TEZAHÜR","SPEKÜLASYON","MOTİVASYON","PARADİGMA",
+"ANOMALİ","KORELASYON","DETERMINİZM","NEDENSELLİK","OLASILIK","SENKRONİZASYON",
+"İNTERAKSİYON","KOMPLEKSİTE","KAOS","BİLİNÇALTI","FENOMEN","NORMATİF",
+"ONTOLOJİ","EPISTEMOLOJİ","RETORİK","SEMANTİK","PRAGMATİK","HEGEMONYA",
+"ALTERNATİF","TEZAT","SENTEZLEME","ÇÖZÜMLEME","KARMAŞIKLIK"
+];
 
-    // SERVICE WORKER
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("sw.js");
-    }
-  </script>
+let level = 0;
+
+function mask(word){
+  return word.split("").map((c,i)=> i%2===0 ? c : "_").join(" ");
+}
+
+function load(){
+  document.getElementById("levelText").innerText = "Seviye " + (level+1) + " / 50";
+  document.getElementById("puzzle").innerText = mask(puzzles[level]);
+  document.getElementById("answer").value = "";
+}
+load();
+
+function check(){
+  const ans = document.getElementById("answer").value.toUpperCase().trim();
+  if(ans === puzzles[level]){
+    document.getElementById("game").classList.add("hidden");
+    document.getElementById("end").classList.remove("hidden");
+  } else {
+    alert("Yanlış");
+  }
+}
+
+function next(){
+  document.getElementById("end").classList.add("hidden");
+  document.getElementById("game").classList.remove("hidden");
+  level++;
+  if(level >= puzzles.length){
+    alert("Tüm bulmacalar tamamlandı");
+    level = 0;
+  }
+  load();
+}
+
+if("serviceWorker" in navigator){
+  navigator.serviceWorker.register("sw.js");
+}
+</script>
 
 </body>
 </html>
